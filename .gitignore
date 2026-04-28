@@ -2,9 +2,13 @@ __pycache__/
 *.pyc
 .env
 .vscode/
-.env
+.venv/
 # Telethon session files
 *.session
 *.session-journal
 # Log files
 *.log
+
+# Tool caches
+.ruff_cache/
+.pytest_cache/
