@@ -1,30 +1,33 @@
 # main.py
 import asyncio
-import os
-from telethon import TelegramClient
-from dotenv import load_dotenv
+from telethon import TelegramClient, events
 from banner import startup_banner
 from shutdown import register_shutdown_handler
 from logger import setup_logger
+from parsers.index import PARSER_REGISTRY
+from config import load_env  # centralized environment loader
 
 # --- Load environment variables ---
-load_dotenv()
-api_id_str = os.getenv("API_ID")
-api_hash = os.getenv("API_HASH")
-if not api_hash:
-    raise ValueError(
-        "API_HASH environment variable is not set. Please set it in your .env file."
-    )
-if not api_id_str:
-    raise ValueError("Environment variable 'API_ID' must be set to a valid integer.")
-api_id = int(api_id_str)
+api_id, api_hash = load_env()
 
 # --- Setup logger ---
 logger = setup_logger(level="INFO", log_file="mishaelle.log")
 
+# --- Initialize client ---
 client = TelegramClient("mishaelle_session", api_id, api_hash)
 
 
+# --- Event handler for new signals ---
+@client.on(events.NewMessage(chats=list(PARSER_REGISTRY.keys())))
+async def signal_handler(event):
+    parser = PARSER_REGISTRY.get(event.chat_id)
+    if parser:
+        parsed = parser(event.raw_text)
+        logger.info(f"Parsed signal from {event.chat.title}: {parsed}")
+        # TODO: save parsed dict into SQLite
+
+
+# --- Main runtime loop ---
 async def main():
     await client.start()
     me = await client.get_me()
