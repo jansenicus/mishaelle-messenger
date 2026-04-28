@@ -1,0 +1,17 @@
+repos:
+  # Ruff hooks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.12   # Match your installed Ruff version
+    hooks:
+      - id: ruff
+        args: [--fix]   # Automatically fix lint issues
+      - id: ruff-format
+
+  # Local hook for pytest with coverage threshold
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run pytest with coverage before commit
+        entry: uv run pytest --cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=80
+        language: system
+        pass_filenames: false

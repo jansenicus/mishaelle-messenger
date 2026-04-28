@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger("mishaelle")
 
+
 async def shutdown(client, timeout: int = 5):
     """
     Gracefully disconnect the Telethon client with a timeout safeguard.
@@ -17,10 +18,12 @@ async def shutdown(client, timeout: int = 5):
     except asyncio.TimeoutError:
         logger.warning(f"⚠ Disconnect timed out after {timeout}s, forcing exit.")
 
+
 def register_shutdown_handler(loop, client, timeout: int = 5):
     """
     Register signal handlers for SIGINT and SIGTERM inside the given event loop.
     """
+
     def handler():
         loop.create_task(shutdown(client, timeout))
 

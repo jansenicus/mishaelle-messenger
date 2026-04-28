@@ -1,6 +1,7 @@
 # logger.py
 import logging
 
+
 def setup_logger(level=logging.INFO, log_file=None):
     """
     Configure logging for the project.
@@ -14,7 +15,7 @@ def setup_logger(level=logging.INFO, log_file=None):
     logging.basicConfig(
         level=level,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=handlers
+        handlers=handlers,
     )
 
     # Silence overly noisy libraries if needed

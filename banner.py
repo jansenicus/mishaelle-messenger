@@ -5,6 +5,7 @@ from datetime import date
 
 console = Console()
 
+
 def days_until_birthday(month=8, day=29):
     today = date.today()
     this_year = date(today.year, month, day)
@@ -16,6 +17,7 @@ def days_until_birthday(month=8, day=29):
         delta = this_year - today
 
     return delta.days
+
 
 def startup_banner():
     today = date.today()

@@ -17,6 +17,7 @@ logger = setup_logger(level="INFO", log_file="mishaelle.log")
 
 client = TelegramClient("mishaelle_session", api_id, api_hash)
 
+
 async def main():
     await client.start()
     me = await client.get_me()
@@ -27,9 +28,14 @@ async def main():
 
     await client.run_until_disconnected()
 
-if __name__ == "__main__":
+
+def run_app():
     startup_banner()
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("✧ CTRL+C pressed, disconnecting...")
+
+
+if __name__ == "__main__":  # pragma: no cover
+    run_app()
