@@ -3,3 +3,8 @@ __pycache__/
 .env
 .vscode/
 .env
+# Telethon session files
+*.session
+*.session-journal
+# Log files
+*.log
