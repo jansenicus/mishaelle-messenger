@@ -9,7 +9,6 @@ def days_until_birthday(month=8, day=29):
     today = date.today()
     this_year = date(today.year, month, day)
 
-    # If birthday already passed this year, calculate for next year
     if today > this_year:
         next_year = date(today.year + 1, month, day)
         delta = next_year - today
@@ -27,7 +26,6 @@ def startup_banner():
     banner.append("   Mishaelle Messenger\n", style="bold purple")
     banner.append("   Virgo-born clarity ✧\n", style="bold gold1")
 
-    # Birthday check
     if today.month == 8 and today.day == 29:
         banner.append("   🎂 Happy Birthday Mishaelle ✧\n", style="bold green")
     else:
