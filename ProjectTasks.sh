@@ -12,7 +12,7 @@ precheck() {
   # Check uv
   if ! command -v uv &> /dev/null; then
     echo "uv not found. Installing uv..."
-    pip install uv
+    curl -LsSf https://astral.sh/uv/install.sh | sh
   else
     echo "uv is installed."
   fi
@@ -30,6 +30,11 @@ precheck() {
   else
     echo "pyenv is installed."
   fi
+
+  # Ensure pyenv is initialized
+  export PATH="$HOME/.pyenv/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
 
   # Check .python-version
   if [ ! -f ".python-version" ]; then
@@ -56,7 +61,7 @@ init() {
 
   if [ ! -d ".venv" ]; then
     echo "Creating hidden virtual environment .venv with uv..."
-    uv venv .venv
+    uv venv .venv --python "$(pyenv which python)"
   fi
 
   echo "Activating environment..."
@@ -81,22 +86,58 @@ reset() {
     echo "requirements.lock not found!"
     exit 1
   fi
-  echo "Uninstalling packages from snapshot..."
-  while read -r pkg; do
-    uv pip uninstall -y "$pkg"
-  done < requirements.lock
+  echo "Syncing environment to requirements.lock..."
+  uv pip sync requirements.lock
   echo "Environment reset complete."
+}
+
+precommit() {
+  echo "=== PRECOMMIT ==="
+
+  # Ensure pre-commit is installed
+  if ! uv run pre-commit --version &> /dev/null; then
+    echo "pre-commit not found. Installing via uv..."
+    uv pip install pre-commit
+  fi
+
+  # Ensure Ruff is installed
+  if ! uv run ruff --version &> /dev/null; then
+    echo "Ruff not found. Installing via uv..."
+    uv pip install ruff
+  fi
+
+  # Generate default config if missing
+  if [ ! -f ".pre-commit-config.yaml" ]; then
+    echo "No .pre-commit-config.yaml found. Creating default config..."
+    cat > .pre-commit-config.yaml <<EOF
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+EOF
+  fi
+
+  echo "Installing git hook..."
+  uv run pre-commit install
+
+  echo "Running pre-commit hooks via uv..."
+  uv run pre-commit run --all-files
+  echo "Pre-commit checks complete."
 }
 
 help() {
   echo "=== HELP ==="
-  echo "Usage: $0 {precheck|init|update|reset|help}"
+  echo "Usage: $0 {precheck|init|update|reset|precommit|help}"
   echo
   echo "Options:"
   echo "  precheck   - Verify OS, uv, pyenv, .python-version, and ensure Python version is installed."
   echo "  init       - Create hidden .venv using uv venv and activate it."
   echo "  update     - Install packages from requirements.txt using uv and save snapshot to requirements.lock."
-  echo "  reset      - Uninstall all packages listed in requirements.lock from the current environment."
+  echo "  reset      - Sync environment exactly to requirements.lock (removes extras, reinstalls missing)."
+  echo "  precommit  - Ensure pre-commit and Ruff are installed, bootstrap config if missing, run hooks."
   echo "  help       - Show this usage guide."
 }
 
@@ -105,9 +146,10 @@ case "$ACTION" in
   init) init ;;
   update) update ;;
   reset) reset ;;
+  precommit) precommit ;;
   help) help ;;
   *)
-    echo "Invalid option. Use: $0 {precheck|init|update|reset|help}"
+    echo "Invalid option. Use: $0 {precheck|init|update|reset|precommit|help}"
     exit 1
     ;;
 esac
