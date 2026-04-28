@@ -2,16 +2,24 @@ import os
 import csv
 import asyncio
 from telethon import TelegramClient
-from dotenv import load_dotenv
 
-load_dotenv()
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+from config import load_env
+
+
+# --- Load environment variables ---
+api_id, api_hash = load_env()
 
 client = TelegramClient("mishaelle_session", api_id, api_hash)
 
 DUMP_DIR = "dumps"
 os.makedirs(DUMP_DIR, exist_ok=True)
+
+
+client = TelegramClient("mishaelle_session", api_id, api_hash)
 
 
 async def dump_channels_groups():
@@ -35,5 +43,9 @@ async def dump_channels_groups():
     print("✅ Channels and Groups dumped into channels_groups_dump.csv")
 
 
-if __name__ == "__main__":
+def main():
     asyncio.run(dump_channels_groups())
+
+
+if __name__ == "__main__":
+    main()
